@@ -1,0 +1,146 @@
+public with sharing class TmwatchDigit {
+    public class SearchResult {
+        @AuraEnabled
+        public Boolean isSelected { get; set; }
+        @AuraEnabled
+        public String Applicants { get; set; }
+        @AuraEnabled
+        public String TmWatch { get; set; }
+        @AuraEnabled
+        public String MatterTitle { get; set; }
+        @AuraEnabled
+        public Id Id { get; set; }
+        @AuraEnabled
+        public String searchResult { get; set; } // Add the searchResult field
+        @AuraEnabled
+        public String FileNumber { get; set; } // Add the File_Number__c field
+        @AuraEnabled
+        public String ApplicationNumber { get; set; } // Add the Application_Number__c field
+        
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<SearchResult> searchKeyword(Integer chr, String searchByApplicationNumber) {
+        
+        List<TM_Watch__c> tmList = new List<TM_Watch__c>();
+        //String[] excludedKeyword = new String[]{'to', 'TO', 'THE', 'the', '&', 'in', 'AND', 'and'};
+        List<SearchResult> results = new List<SearchResult>();
+        
+        if (!String.isEmpty(searchByApplicationNumber)){
+            tmList = [SELECT Id,Mark__c,Applicant__c, Application_Number__c FROM TM_Watch__c WHERE Application_Number__c != null];
+        }else{
+            tmList = [SELECT Id,Mark__c,Applicant__c, Application_Number__c FROM TM_Watch__c];
+        }
+    
+    	List<Opportunity> matterList = [SELECT Id,Name, File_Number__c FROM Opportunity WHERE File_Number__c != null];
+    
+        String[] arKeyword;
+        String[] appNumber;
+       // String fileNumber;
+    
+    for (TM_Watch__c tm : tmList) {
+        
+        if (!String.isEmpty(searchByApplicationNumber)){
+            appNumber = String.valueOf(tm.Application_Number__c ).split('/');
+            arKeyword = new String[]{appNumber[2]};     
+            //System.debug('*** arKeyword *** ' + arKeyword);
+        }else{
+            if (tm.Mark__c == null){
+                continue;
+            }
+            arKeyword = String.valueOf(tm.Mark__c).split(' ');
+            //System.debug('*** arKeyword *** ' + arKeyword);
+        }
+        
+        //System.debug('*** CHR *** ' + chr);
+
+        
+       
+        
+        //appNumber = tm.Application_Number__c;
+        //arKeyword = appNumber.split(' ');
+         //arKeyword = appNumber.split('/');
+       // system.debug('***'+arKeyword[2]);
+        
+        for (String k : arKeyword) {
+            
+            if (String.isEmpty(searchByApplicationNumber)){
+            	if (k.length() < chr) {
+                	continue;
+            	}    
+            }
+            
+            SearchResult result = new SearchResult();
+            result.Applicants = tm.Applicant__c;
+            result.ApplicationNumber = tm.Application_Number__c;
+            result.TmWatch = tm.Mark__c;
+            
+            // applicable for mark
+            if (String.isEmpty(searchByApplicationNumber)){
+            	result.searchResult = k.substring(0, chr); // Calculate searchResult based on chr  
+                processOpportunity(result, matterList, k.substring(0, chr));
+                if (!String.isBlank(result.FileNumber)) {
+                    result.Id = tm.Id;
+                    results.add(result);
+                }
+            }else{
+                // applicable for application number
+                System.debug('*** K *** '+ k);
+                processSearchOpportunityApplicationNumber(result, matterList, k);
+                if (!String.isBlank(result.FileNumber)) {
+                    result.Id = tm.Id;
+                    results.add(result);
+                }
+                break;
+            }
+        }
+    }
+        
+    System.debug('*** results *** '+ results);
+    return results;
+}
+    
+    private static void processSearchOpportunityApplicationNumber(SearchResult result, List<Opportunity> matterList, String keyword) {
+        String[] arValue = new String[]{};
+        for (Opportunity op : matterList) {
+            if (op.File_Number__c != null) {
+                
+                arValue = String.valueOf(op.File_Number__c).split('-');
+                System.debug('*** keyword *** '+keyword);
+                System.debug('*** arValue *** '+arValue);
+                                
+                if (arValue.size() > 1 && keyword.equals(arValue[2])){
+                    result.MatterTitle = op.Name;
+                	result.FileNumber = op.File_Number__c;
+                	break;
+                }
+            }
+        }
+    }
+    
+    private static void processOpportunity(SearchResult result, List<Opportunity> matterList, String keyword) {
+    for (Opportunity op : matterList) {
+        if (op.File_Number__c != null ) {
+            result.MatterTitle = op.Name;
+            result.FileNumber = op.File_Number__c;
+            break;
+        }
+    }
+}
+
+	@AuraEnabled
+	public static void saveSelectedRecords(List<SearchResult> selectedRecords) {
+    List<TM_Result__c> newRecordsToInsert = new List<TM_Result__c>();
+    for (SearchResult record : selectedRecords) {
+        if (record.isSelected && record.FileNumber != null) {
+            TM_Result__c newRecord = new TM_Result__c();
+            newRecord.Matter_Title__c = record.MatterTitle;
+            newRecordsToInsert.add(newRecord);
+        }
+    }
+    if (!newRecordsToInsert.isEmpty()) {
+        insert newRecordsToInsert;
+    }
+
+}
+}
