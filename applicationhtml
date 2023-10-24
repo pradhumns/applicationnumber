@@ -1,0 +1,160 @@
+<template>
+    <lightning-card>
+      <div class="slds-grid slds-gutters backimgg">
+        <div class="slds-col slds-size_1-of-6">
+          <span><lightning-input label="Search Digit" type="text" value={chr} onchange={handleInputChange}></lightning-input></span>
+        </div>
+        <div class="slds-col slds-size_1-of-6 Searchbutton">
+            <span><lightning-button label="Search" onclick={search}></lightning-button></span>
+        </div>
+        <div class="slds-col slds-size_1-of-6 Searchbutton">
+            <span><lightning-button label="Search By Character" onclick={navigateToLightningComponent}></lightning-button></span>
+        </div>    
+        <div class="slds-col slds-size_1-of-6 Searchbutton returnbutton">
+          <span><lightning-button label="Return to list view" onclick={close}></lightning-button></span>
+        </div>
+        <div class="slds-col slds-size_1-of-6  Submitbutton ">
+          <span><lightning-button label="Submit" onclick={submitSelectedRecords}></lightning-button></span>
+        </div>    
+        </div>
+     
+    
+      <div id="containerDiv" onmousemove={handlemousemove} onmouseup={handlemouseup}
+             ondblclick={handledblclickresizable}
+             class="slds-table_header-fixed_container slds-border_right slds-border_left tableScroll backimg"
+             onscroll={tableOuterDivScrolled}>
+            <div id="tableViewInnerDiv" onscroll={tableScrolled} class="slds-scrollable_y tableViewInnerDiv backimg">
+              <template if:true={searchResults}>
+    
+                <table
+                       class="slds-table slds-table_bordered slds-table_header-fixed backimg slds-table_resizable-cols slds-table_fixed-layout backimg">
+                    <thead>
+                        <tr>
+                            <th class="slds-is-resizable dv-dynamic-width" scope="col"   title="Column 1">
+                                <div class="slds-cell-fixed"  >
+                                    <a class="slds-th__action slds-text-link--reset backimg">
+                                        <span class="slds-truncate ">FileNumber</span>
+                                    </a>
+                                    <div class="slds-resizable  backimg">
+                                        <span class="slds-resizable__handle" onmousedown={handlemousedown}>
+                                            <span class="slds-resizable__divider"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="slds-is-resizable dv-dynamic-width" scope="col"   title="Column 1">
+                                <div class="slds-cell-fixed"  >
+                                    <a class="slds-th__action slds-text-link--reset backimg">
+                                        <span class="slds-truncate ">ApplicationNumber</span>
+                                    </a>
+                                    <div class="slds-resizable  backimg">
+                                        <span class="slds-resizable__handle" onmousedown={handlemousedown}>
+                                            <span class="slds-resizable__divider"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="slds-is-resizable dv-dynamic-width" scope="col"   title="Column 1">
+                                <div class="slds-cell-fixed"  >
+                                    <a class="slds-th__action slds-text-link--reset backimg">
+                                        <span class="slds-truncate ">Applicants</span>
+                                    </a>
+                                    <div class="slds-resizable  backimg">
+                                        <span class="slds-resizable__handle" onmousedown={handlemousedown}>
+                                            <span class="slds-resizable__divider"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="slds-is-resizable dv-dynamic-width" scope="col"   title="Column 2">
+                                <div class="slds-cell-fixed backimg"  >
+                                    <a class="slds-th__action slds-text-link--reset backimg">
+                                        <span class="slds-truncate">TmWatch</span>
+                                    </a>
+                                    <div class="slds-resizable">
+                                        <span class="slds-resizable__handle" onmousedown={handlemousedown}>
+                                            <span class="slds-resizable__divider"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="slds-is-resizable dv-dynamic-width" scope="col"   title="Column 2">
+                                <div class="slds-cell-fixed backimg"  >
+                                    <a class="slds-th__action slds-text-link--reset backimg">
+                                        <span class="slds-truncate">Search Result</span>
+                                    </a>
+                                    <div class="slds-resizable">
+                                        <span class="slds-resizable__handle" onmousedown={handlemousedown}>
+                                            <span class="slds-resizable__divider"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="slds-is-resizable dv-dynamic-width" scope="col"   title="Column 2">
+                                <div class="slds-cell-fixed backimg"  >
+                                    <a class="slds-th__action slds-text-link--reset backimg">
+                                        <span class="slds-truncate">MatterTitle</span>
+                                    </a>
+                                    <div class="slds-resizable">
+                                        <span class="slds-resizable__handle" onmousedown={handlemousedown}>
+                                            <span class="slds-resizable__divider"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="slds-is-resizable dv-dynamic-width" scope="col"   title="Column 3">
+                                <div class="slds-cell-fixed"  >
+                                    <a class="slds-th__action slds-text-link--reset backimg">
+                                        <span class="slds-truncate">Select</span>
+                                    </a>
+                                    <div class="slds-resizable">
+                                        <span class="slds-resizable__handle" onmousedown={handlemousedown}>
+                                            <span class="slds-resizable__divider"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-cell-fixed">
+                                      
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      <template for:each={searchResults} for:item="record">   
+                          <tr class="slds-truncate dv-dynamic-width" key={record.Id}>
+                             
+                              <td class="slds-truncate dv-dynamic-width textclass" data-label="Contact Title">
+                                  {record.FileNumber}
+                              </td>
+                              <td class="slds-truncate dv-dynamic-width textclass" data-label="Contact Title">
+                                  {record.ApplicationNumber}
+                              </td>
+                              <td class="slds-truncate dv-dynamic-width textclass" data-label="Contact Title">
+                                  {record.Applicants}
+                              </td>
+                              <td  class="slds-truncate dv-dynamic-width textclass" data-label="Opportunity Name">
+                                  {record.TmWatch}
+                              </td>
+                              <td  class="slds-truncate dv-dynamic-width textclass" data-label="Opportunity Name">
+                                  {record.searchResult}
+                              </td>
+                              <td  class="slds-truncate dv-dynamic-width textclass" data-label="Opportunity Name">
+                                  {record.MatterTitle}
+                              </td>
+                               <td class="slds-truncate dv-dynamic-width" data-label="Select">
+                                  <!-- Add a checkbox for each record -->
+                                  <lightning-input type="checkbox" checked={record.isSelected} data-id={record.Id} onchange={handleCheckboxChange}></lightning-input>
+                              </td>
+                              <!-- Add other columns if needed -->
+                          </tr>
+                      </template>
+                  </tbody>
+                </table></template>
+                
+            </div>
+        </div>
+      </lightning-card>
+    
+    </template>
